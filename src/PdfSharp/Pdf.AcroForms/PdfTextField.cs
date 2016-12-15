@@ -28,6 +28,7 @@
 #endregion
 
 using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.Internal;
@@ -88,6 +89,94 @@ namespace PdfSharp.Pdf.AcroForms
             set { _backColor = value; }
         }
         XColor _backColor = XColor.Empty;
+
+        public XStringFormat Alignment
+        {
+            get {
+                XStringFormat _alignment;
+                if (MultiLine)
+                {
+                    _alignment = XStringFormats.TopLeft;
+
+                    switch (Elements.GetInteger(Keys.Q))
+                    {
+                        case 0:
+                            _alignment = XStringFormats.TopLeft;
+                            break;
+                        case 1:
+                            _alignment = XStringFormats.TopCenter;
+                            break;
+                        case 2:
+                            _alignment = XStringFormats.TopRight;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    _alignment = XStringFormats.CenterLeft;
+                    switch (Elements.GetInteger(Keys.Q))
+                    {
+                        case 0:
+                            _alignment = XStringFormats.CenterLeft;
+                            break;
+                        case 1:
+                            _alignment = XStringFormats.Center;
+                            break;
+                        case 2:
+                            _alignment = XStringFormats.CenterRight;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return _alignment;
+            }
+            set {
+
+                    if (XStringFormats.Equals(value, XStringFormats.CenterLeft) || XStringFormats.Equals(value, XStringFormats.BottomLeft) || XStringFormats.Equals(value, XStringFormats.TopLeft))
+                    {
+                        Elements.SetInteger(Keys.Q, 0);
+                    }
+                    else if (XStringFormats.Equals(value, XStringFormats.Center) || XStringFormats.Equals(value, XStringFormats.TopCenter) || XStringFormats.Equals(value, XStringFormats.BottomCenter))
+                    {
+                        Elements.SetInteger(Keys.Q, 1);
+                    }
+                    else if (XStringFormats.Equals(value, XStringFormats.CenterRight) || XStringFormats.Equals(value, XStringFormats.TopRight) || XStringFormats.Equals(value, XStringFormats.BottomRight))
+                    {
+                        Elements.SetInteger(Keys.Q, 2);
+                    }               
+            }
+        }
+
+        public double TopMargin
+        {
+            get { return _topMargin; }
+            set { _topMargin = value; }
+        }
+        double _topMargin = 0;
+
+        public double BottomMargin
+        {
+            get { return _bottomMargin; }
+            set { _bottomMargin = value; }
+        }
+        double _bottomMargin = 0;
+
+        public double LeftMargin
+        {
+            get { return _leftMargin; }
+            set { _leftMargin = value; }
+        }
+        double _leftMargin = 0;
+
+        public double RightMargin
+        {
+            get { return _rightMargin; }
+            set { _rightMargin = value; }
+        }
+        double _rightMargin = 0;
 
         /// <summary>
         /// Gets or sets the maximum length of the field.
@@ -238,14 +327,35 @@ namespace PdfSharp.Pdf.AcroForms
             PdfRectangle rect = Elements.GetRectangle(PdfAnnotation.Keys.Rect);
             XForm form = new XForm(_document, rect.Size);
             XGraphics gfx = XGraphics.FromForm(form);
+            XRect xrect = (rect.ToXRect() - rect.Location);
 
             if (_backColor != XColor.Empty)
-                gfx.DrawRectangle(new XSolidBrush(BackColor), rect.ToXRect() - rect.Location);
+                gfx.DrawRectangle(new XSolidBrush(BackColor), xrect);
 
             string text = Text;
+            
+
             if (text.Length > 0)
-                gfx.DrawString(Text, Font, new XSolidBrush(ForeColor),
-                  rect.ToXRect() - rect.Location + new XPoint(2, 0), XStringFormats.TopLeft);
+            {
+                
+                xrect.Y = xrect.Y + TopMargin;
+                xrect.X = xrect.X + LeftMargin;
+                xrect.Width = xrect.Width + RightMargin;
+                xrect.Height = xrect.Height + BottomMargin;
+                if (this.MultiLine)
+                {
+                    XTextFormatter formatter = new XTextFormatter(gfx);
+                    formatter.Text = text;
+                    
+                    formatter.DrawString(Text, Font, new XSolidBrush(ForeColor),
+                     xrect, Alignment);
+                }
+                else
+                {
+                    gfx.DrawString(Text, Font, new XSolidBrush(ForeColor),
+                     xrect, Alignment);
+                }
+            }
 
             form.DrawingFinished();
             form.PdfForm.Elements.Add("/FormType", new PdfLiteral("1"));
