@@ -150,6 +150,16 @@ namespace PdfSharp.Pdf.AcroForms
             }
         }
 
+        public PdfRectangle Rect {
+            get
+            {
+                return Elements.GetRectangle(PdfAnnotation.Keys.Rect, true);
+            }
+            set
+            {
+                Elements.SetRectangle(PdfAnnotation.Keys.Rect, value);
+            }
+        }
         public double TopMargin
         {
             get { return _topMargin; }

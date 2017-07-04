@@ -424,7 +424,7 @@ namespace PdfSharp.Drawing.Pdf
 
         // ----- DrawString ---------------------------------------------------------------------------
 
-        public void DrawString(string s, XFont font, XBrush brush, XRect rect, XStringFormat format)
+        public void DrawString(string s, XFont font, XBrush brush, XRect rect, XStringFormat format, XGraphicsPdfRendererOptions options = null)
         {
             double x = rect.X;
             double y = rect.Y;
@@ -441,7 +441,7 @@ namespace PdfSharp.Drawing.Pdf
             bool strikeout = (font.Style & XFontStyle.Strikeout) != 0;
             bool underline = (font.Style & XFontStyle.Underline) != 0;
 
-            Realize(font, brush, boldSimulation ? 2 : 0);
+            Realize(font, brush, options == null ? options = new XGraphicsPdfRendererOptions() : options);
 
             switch (format.Alignment)
             {
@@ -581,6 +581,7 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     AdjustTdOffset(ref pos, verticalOffset, false);
                     AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                    Append("0 g\n");
                 }
             }
 #else
@@ -1755,15 +1756,24 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
+
+
+
+
         /// <summary>
         /// Begins the graphic mode (i.e. ends the text mode).
         /// </summary>
-        internal void BeginTextMode()
+        internal void BeginTextMode(XGraphicsPdfRendererOptions options)
         {
             if (_streamMode != StreamMode.Text)
             {
                 _streamMode = StreamMode.Text;
                 _content.Append("BT\n");
+                if (options.IncludeRenderModeForPage)
+                {
+                    AppendFormatInt("{0} Tr\n", Convert.ToInt32(options.RenderMode));
+                }
+                
                 // Text matrix is empty after BT
                 _gfxState.RealizedTextPosition = new XPoint();
                 _gfxState.ItalicSimulationOn = false;
@@ -1787,7 +1797,7 @@ namespace PdfSharp.Drawing.Pdf
             if (brush != null)
             {
                 // Render mode is 0 except for bold simulation.
-                _gfxState.RealizeBrush(brush, _colorMode, 0, 0); // page.document.Options.ColorMode);
+                _gfxState.RealizeBrush(brush, _colorMode, null, 0); // page.document.Options.ColorMode);
             }
         }
 
@@ -1810,14 +1820,14 @@ namespace PdfSharp.Drawing.Pdf
         /// <summary>
         /// Makes the specified font and brush to the current graphics objects.
         /// </summary>
-        void Realize(XFont font, XBrush brush, int renderingMode)
+        void Realize(XFont font, XBrush brush, XGraphicsPdfRendererOptions options)
         {
             BeginPage();
             RealizeTransform();
-            BeginTextMode();
-            _gfxState.RealizeFont(font, brush, renderingMode);
+            BeginTextMode(options);
+            _gfxState.RealizeFont(font, brush, options);
         }
-
+        
         /// <summary>
         /// PDFsharp uses the Td operator to set the text position. Td just sets the offset of the text matrix
         /// and produces lesser code as Tm.

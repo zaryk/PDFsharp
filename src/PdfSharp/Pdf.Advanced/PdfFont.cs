@@ -99,7 +99,10 @@ namespace PdfSharp.Pdf.Advanced
         }
         internal PdfToUnicodeMap _toUnicode;
 
-
+        internal override void PrepareForSave()
+        {
+            
+        }
         /// <summary>
         /// Adds a tag of exactly six uppercase letters to the font name 
         /// according to PDF Reference Section 5.5.3 'Font Subsets'

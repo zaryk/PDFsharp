@@ -696,7 +696,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : PdfPage.InheritablePageKeys
+        public sealed class Keys : PdfPage.InheritablePageKeys
         {
             /// <summary>
             /// (Required) The type of PDF object that this dictionary describes; 
@@ -729,7 +729,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta
+            internal static DictionaryMeta Meta
             {
                 get { return _meta ?? (_meta = CreateMeta(typeof(Keys))); }
             }

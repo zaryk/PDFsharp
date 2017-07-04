@@ -35,6 +35,7 @@ using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+using System.Collections.Generic;
 
 namespace PdfSharp.Pdf
 {
@@ -215,6 +216,19 @@ namespace PdfSharp.Pdf
         {
             get { return Elements.GetRectangle(Keys.CropBox, true); }
             set { Elements.SetRectangle(Keys.CropBox, value); }
+        }
+
+        public bool HasRotation
+        {
+            get
+            {
+                var rotateObject = _elements[InheritablePageKeys.Rotate];
+                if (rotateObject == null)
+                {
+                    return false;
+                }
+                return true;
+            }
         }
 
         /// <summary>
@@ -502,6 +516,18 @@ namespace PdfSharp.Pdf
             return name;
         }
 
+        public Dictionary<string, PdfFont> AddedFonts;
+        public void SetFontName(XFont font)
+        {
+            if(AddedFonts == null)
+            {
+                AddedFonts = new Dictionary<string, PdfFont>();
+            }
+            PdfFont pdfFont = _document.FontTable.GetFont(font);
+            string name = Resources.AddFont(pdfFont);
+            AddedFonts.Add(name, pdfFont);
+        }
+
         string IContentStream.GetFontName(XFont font, out PdfFont pdfFont)
         {
             return GetFontName(font, out pdfFont);
@@ -519,6 +545,7 @@ namespace PdfSharp.Pdf
                 name = Resources.AddFont(pdfFont);
             return name;
         }
+
 
         /// <summary>
         /// Gets the resource name of the specified font data within this page.
@@ -575,6 +602,7 @@ namespace PdfSharp.Pdf
         {
             return GetFormName(form);
         }
+
 
         internal override void WriteObject(PdfWriter writer)
         {
@@ -726,12 +754,14 @@ namespace PdfSharp.Pdf
                 TrimBox = rect;
                 ArtBox = rect.Clone();
             }
+
+
         }
 
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : InheritablePageKeys
+        public sealed class Keys : InheritablePageKeys
         {
             /// <summary>
             /// (Required) The type of PDF object that this dictionary describes;
@@ -951,7 +981,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Predefined keys common to PdfPage and PdfPages.
         /// </summary>
-        internal class InheritablePageKeys : KeysBase
+        public class InheritablePageKeys : KeysBase
         {
             /// <summary>
             /// (Required; inheritable) A dictionary containing any resources required by the page. 

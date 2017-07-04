@@ -30,6 +30,7 @@
 using System;
 using System.Collections.Generic;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Drawing.Pdf;
 
 namespace PdfSharp.Drawing.Layout
 {

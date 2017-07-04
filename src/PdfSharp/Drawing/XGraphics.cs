@@ -75,6 +75,7 @@ using PdfSharp.Pdf;
 using PdfSharp.Drawing.Pdf;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
+using static PdfSharp.Drawing.Pdf.XGraphicsPdfRenderer;
 
 #pragma warning disable 1587
 // ReSharper disable UseNullPropagation
@@ -102,8 +103,28 @@ namespace PdfSharp.Drawing  // #??? aufräumen
 #if CORE
         // TODO: Implement better concept of a measure context.
 #endif
+        private XGraphicsPdfRendererOptions _renderOptions { get; set; }
+        public XGraphicsPdfRendererOptions RenderOptions
+        {
+            get
+            {
+                if (_renderOptions == null)
+                {
+                    _renderOptions = new XGraphicsPdfRendererOptions();
+                }
 
+                return _renderOptions;
+            }
+            set
+            {
+                _renderOptions = value;
+            }
+        }
 #if GDI
+
+
+
+        
         /// <summary>
         /// Initializes a new instance of the XGraphics class.
         /// </summary>
@@ -3613,7 +3634,7 @@ namespace PdfSharp.Drawing  // #??? aufräumen
             }
 
             if (_renderer != null)
-                _renderer.DrawString(text, font, brush, layoutRectangle, format);
+                _renderer.DrawString(text, font, brush, layoutRectangle, format, RenderOptions);
         }
 
         // ----- MeasureString ------------------------------------------------------------------------

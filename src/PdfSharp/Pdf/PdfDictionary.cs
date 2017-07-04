@@ -1343,7 +1343,11 @@ namespace PdfSharp.Pdf
             /// </summary>
             public bool Remove(string key)
             {
-                return _elements.Remove(key);
+                if (_elements.ContainsKey(key))
+                {
+                    return _elements.Remove(key);
+                }
+                return true;
             }
 
             /// <summary>

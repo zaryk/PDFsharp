@@ -41,6 +41,7 @@ using PdfSharp.Internal;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
+using static PdfSharp.Drawing.Pdf.XGraphicsPdfRenderer;
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
 
@@ -235,7 +236,7 @@ namespace PdfSharp.Drawing.Pdf
         XColor _realizedFillColor = XColor.Empty;
         bool _realizedNonStrokeOverPrint;
 
-        public void RealizeBrush(XBrush brush, PdfColorMode colorMode, int renderingMode, double fontEmSize)
+        public void RealizeBrush(XBrush brush, PdfColorMode colorMode, XGraphicsPdfRendererOptions options, double fontEmSize)
         {
             // Rendering mode 2 is used for bold simulation.
             // Reference: TABLE 5.3  Text rendering modes / Page 402
@@ -246,11 +247,11 @@ namespace PdfSharp.Drawing.Pdf
                 XColor color = solidBrush.Color;
                 bool overPrint = solidBrush.Overprint;
 
-                if (renderingMode == 0)
+                if (options.RenderMode == XGraphicsPdfRenderMode.Text_Render_Mode_Fill)
                 {
                     RealizeFillColor(color, overPrint, colorMode);
                 }
-                else if (renderingMode == 2)
+                else if (options.RenderMode == XGraphicsPdfRenderMode.Text_Render_Mode_Fill_Stroke)
                 {
                     // Come here in case of bold simulation.
                     RealizeFillColor(color, false, colorMode);
@@ -262,7 +263,7 @@ namespace PdfSharp.Drawing.Pdf
             }
             else
             {
-                if (renderingMode != 0)
+                if (options.RenderMode != 0)
                     throw new InvalidOperationException("Rendering modes other than 0 can only be used with solid color brushes.");
 
                 XLinearGradientBrush gradientBrush = brush as XLinearGradientBrush;
@@ -335,25 +336,25 @@ namespace PdfSharp.Drawing.Pdf
         internal PdfFont _realizedFont;
         string _realizedFontName = String.Empty;
         double _realizedFontSize;
-        int _realizedRenderingMode;  // Reference: TABLE 5.2  Text state operators / Page 398
+        XGraphicsPdfRenderMode _realizedRenderingMode;  // Reference: TABLE 5.2  Text state operators / Page 398
         double _realizedCharSpace;  // Reference: TABLE 5.2  Text state operators / Page 398
 
-        public void RealizeFont(XFont font, XBrush brush, int renderingMode)
+        public void RealizeFont(XFont font, XBrush brush, XGraphicsPdfRendererOptions options = null)
         {
             const string format = Config.SignificantFigures3;
 
             // So far rendering mode 0 (fill text) and 2 (fill, then stroke text) only.
-            RealizeBrush(brush, _renderer._colorMode, renderingMode, font.Size); // _renderer.page.document.Options.ColorMode);
+            RealizeBrush(brush, _renderer._colorMode, options, font.Size); // _renderer.page.document.Options.ColorMode);
 
             // Realize rendering mode.
-            if (_realizedRenderingMode != renderingMode)
+            if (_realizedRenderingMode != options.RenderMode || options.IncludeRenderModeForObject)
             {
-                _renderer.AppendFormatInt("{0} Tr\n", renderingMode);
-                _realizedRenderingMode = renderingMode;
+                _renderer.AppendFormatInt("{0} Tr\n", Convert.ToInt32(options.RenderMode));
+                _realizedRenderingMode = options.RenderMode;
             }
 
             // Realize character spacing.
-            if (_realizedRenderingMode == 0)
+            if (_realizedRenderingMode == XGraphicsPdfRenderMode.Text_Render_Mode_Fill)
             {
                 if (_realizedCharSpace != 0)
                 {

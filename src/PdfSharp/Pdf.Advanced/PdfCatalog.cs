@@ -214,7 +214,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             /// <summary>
             /// (Required) The type of PDF object that this dictionary describes; 
@@ -411,7 +411,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta
+            internal static DictionaryMeta Meta
             {
                 get { return _meta ?? (_meta = CreateMeta(typeof(Keys))); }
             }

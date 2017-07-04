@@ -28,8 +28,10 @@
 #endregion
 
 #if GDI
+using PdfSharp.Drawing.Pdf;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using static PdfSharp.Drawing.Pdf.XGraphicsPdfRenderer;
 #endif
 #if WPF
 using System.Windows.Media;
@@ -125,7 +127,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Draws a series of glyphs identified by the specified text and font.
         /// </summary>
-        void DrawString(string s, XFont font, XBrush brush, XRect layoutRectangle, XStringFormat format);
+        void DrawString(string s, XFont font, XBrush brush, XRect layoutRectangle, XStringFormat format, XGraphicsPdfRendererOptions options);
 
         /// <summary>
         /// Draws an image.

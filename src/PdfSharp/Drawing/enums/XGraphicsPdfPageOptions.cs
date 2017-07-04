@@ -37,16 +37,32 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// The new content is inserted behind the old content and any subsequent drawing in done above the existing graphic.
         /// </summary>
-        Append,
+        Append = 0,
 
         /// <summary>
         /// The new content is inserted before the old content and any subsequent drawing in done beneath the existing graphic.
         /// </summary>
-        Prepend,
+        Prepend = 1,
 
         /// <summary>
         /// The new content entirely replaces the old content and any subsequent drawing in done on a blank page.
         /// </summary>
-        Replace,
+        Replace = 2,
     }
+
+    public class XGraphicsPdfRendererOptions
+    {
+        public XGraphicsPdfRenderMode RenderMode { get; set; }
+        public bool IncludeRenderModeForPage { get; set; }
+        public bool IncludeRenderModeForObject { get; set; }
+    }
+
+    public enum XGraphicsPdfRenderMode
+    {
+        Text_Render_Mode_Fill = 0,
+        Text_Render_Mode_Stroke = 1,
+        Text_Render_Mode_Fill_Stroke = 2,
+        Text_Render_Mode_Invisible = 3
+    }
+
 }
